@@ -1,0 +1,1 @@
+Repositório destinado ao desenvolvimento de um dashboard relacionado ao tempo de todas as capitais do Brasil
