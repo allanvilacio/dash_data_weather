@@ -1,4 +1,5 @@
-from dash import Dash, html, dcc, Input, Output, dash_table
+from dash import Dash, dcc ,html, Input, Output, State
+import dash_bootstrap_components as dbc
 import plotly.express as px
 from utility.data_frames import get_df_weather, get_d_cidades
 
@@ -6,77 +7,81 @@ from utility.data_frames import get_df_weather, get_d_cidades
 df_weather = get_df_weather()
 d_cidades = get_d_cidades()
 
-#filtros
-filtro_cidades = d_cidades['nome_mun'].unique().tolist()
-filtro_cidades.append('Todas as cidades')
+app = Dash(__name__, external_stylesheets=[dbc.themes.CYBORG])
 
-# Estilos e updates
-update_traces = {'hovertemplate':'%{y:.2}</b>', 'line_shape':'spline'}
-update_layout = {'hovermode':'x unified'}
-
-
-app = Dash(__name__)
-app.title = 'Data dash weather'
-
-
-'''
 df_weather_fig = df_weather.groupby(by='days_datetime').mean(numeric_only=True)['days_temp'].reset_index()
 fig = px.line(df_weather_fig,
              y='days_temp',
              x=df_weather_fig['days_datetime'].dt.dayofyear,
-             color= df_weather_fig['days_datetime'].dt.year)
-fig.update_traces(update_traces)
-fig.update_layout(update_layout)
-'''
+             color= df_weather_fig['days_datetime'].dt.year,
+             title='Fig 1')
+fig.update_traces({'hovertemplate':'%{y:.2}</b>', 'line_shape':'spline'})
+fig.update_layout({'hovermode':'x unified'})
 
-app.layout = html.Div(children=[
+fig2 = px.bar(df_weather_fig,
+             y='days_temp',
+             x=df_weather_fig['days_datetime'].dt.dayofyear,
+             color= df_weather_fig['days_datetime'].dt.year,
+             title='Fig 2')
+fig2.update_traces({'hovertemplate':'%{y:.2}</b>'})
+fig2.update_layout({'hovermode':'x unified'})
 
-    html.H1(children='Data dash weather'),
+app.layout = dbc.Container(
+    [
+        html.Div(
+            [
+                dbc.Button(
+                    "Open scrollable offcanvas",
+                    id="open-offcanvas-scrollable",
+                    n_clicks=0,
+                ),
+                dbc.Offcanvas(
+                    html.P("The contents on the main page are now scrollable."),
+                    id="offcanvas-scrollable",
+                    scrollable=True,
+                    title="Scrollable Offcanvas",
+                    is_open=False
+                ),
+            ]
+        ),
 
-    # Dropdown para colocar no layout
-    dcc.Dropdown(filtro_cidades, 'Todas as cidades', id='filtro_cidades'),
-
-    html.Div(id='teste_filtro_div', children=''),
-    html.Div(id='teste_filtro_ibge', children='Ibge'),
-
-
-    dcc.Graph(
-        id='example-graph'),
+        dbc.Row(
+            [
+                dbc.Col(html.Div("One of three columns1"),width="auto"),
+                dbc.Col(html.Div("One of three columns2"),width="auto", align='center'),
+                dbc.Col(html.Div("One of three columns3"),width="auto", align='center'),
+                dbc.Col(html.Div("One of three columns4"),width="auto", align='center'),
+                dbc.Col(html.Div("One of three columns5"),width="auto", align='center')
+            ]
+        ),
+        dbc.Row(
+            [
+                dbc.Col(
+                        [
+                            dcc.Graph(id='example-graph', figure=fig)
+                        ]
+                ),
+                dbc.Col(
+                        [
+                            dcc.Graph(id='example-graph', figure=fig2)
+                        ]
+                )
+            ], style={'margin-top': '10px'}  
     
-    dash_table.DataTable(id='example-table',
-                        columns=[{"name": i.upper(), "id": i, "presentation": "markdown"} for i in d_cidades.columns],
-                        data=d_cidades.to_dict('records'))
-])
+        )
+    ]
+)
 
 @app.callback(
-    [Output('teste_filtro_div', 'children'),
-     Output('teste_filtro_ibge', 'children'),
-     Output('example-graph', 'figure')],
-    [Input('filtro_cidades', 'value')]
+    Output("offcanvas-scrollable", "is_open"),
+    Input("open-offcanvas-scrollable", "n_clicks"),
+    State("offcanvas-scrollable", "is_open"),
 )
-def update_filtros(input_value):
-
-    teste_filtro_div = f'Dash: A web application framework for your data da cidade de {input_value}.'
-    teste_filtro_ibge = d_cidades[d_cidades['nome_mun']==input_value]['codigo_ibge'].tolist()
-    
-    if input_value == 'Todas as cidades':
-        df_weather_fig = df_weather
-    else:
-        df_weather_fig = df_weather.loc[df_weather['codigo_ibge'].isin(teste_filtro_ibge)]
-    
-    df_weather_fig = df_weather_fig.groupby(by=['days_datetime']).mean(numeric_only=True)['days_temp'].reset_index()
-    
-    fig = px.line(df_weather_fig,
-                x=df_weather_fig['days_datetime'].dt.dayofyear,
-                y='days_temp', 
-                color=df_weather_fig['days_datetime'].dt.year)
-    
-    fig.update_traces(update_traces)
-    fig.update_layout(update_layout)
-
-    return teste_filtro_div, teste_filtro_ibge, fig
-
-
+def toggle_offcanvas_scrollable(n1, is_open):
+    if n1:
+        print(n1)
+        return not is_open
+    return is_open
 
 if __name__ == '__main__':
     app.run_server(debug=True)
