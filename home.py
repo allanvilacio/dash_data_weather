@@ -15,8 +15,8 @@ fig = px.line(df_weather_fig,
              x=df_weather_fig['days_datetime'].dt.dayofyear,
              color= df_weather_fig['days_datetime'].dt.year,
              title='Fig 1')
-fig.update_traces({'hovertemplate':'%{y:.2}</b>', 'line_shape':'spline'})
-fig.update_layout({'hovermode':'x unified'})
+fig.update_traces({'hovertemplate':'%{y:.2}</b>', 'line_shape':'spline'} )
+fig.update_layout({'hovermode':'x unified', "template":"plotly_dark"})
 
 fig2 = px.bar(df_weather_fig,
              y='days_temp',
@@ -24,7 +24,7 @@ fig2 = px.bar(df_weather_fig,
              color= df_weather_fig['days_datetime'].dt.year,
              title='Fig 2')
 fig2.update_traces({'hovertemplate':'%{y:.2}</b>'})
-fig2.update_layout({'hovermode':'x unified'})
+fig2.update_layout({'hovermode':'x unified', "template":"plotly_dark"})
 
 app.layout = dbc.Container(
     [
@@ -47,11 +47,61 @@ app.layout = dbc.Container(
 
         dbc.Row(
             [
-                dbc.Col(html.Div("One of three columns1"),width="auto"),
-                dbc.Col(html.Div("One of three columns2"),width="auto", align='center'),
-                dbc.Col(html.Div("One of three columns3"),width="auto", align='center'),
-                dbc.Col(html.Div("One of three columns4"),width="auto", align='center'),
-                dbc.Col(html.Div("One of three columns5"),width="auto", align='center')
+                dbc.Col(dbc.Card([   
+                            dbc.CardBody([
+                                html.Span("Casos recuperados", className="card-text"),
+                                html.H3(children=df_weather[df_weather.index == df_weather.index.max()]['days_tempmax'],
+                                        style={"color": "#adfc92"}, id="casos-recuperados-text_1"),
+                                html.Span("Em acompanhamento", className="card-text"),
+                                html.H5(id="em-acompanhamento-text_1"),
+                                ])
+                            ], color="light", outline=True, style={"margin-top": "10px",
+                                    "box-shadow": "0 4px 4px 0 rgba(0, 0, 0, 0.15), 0 4px 20px 0 rgba(0, 0, 0, 0.19)",
+                                    "color": "#FFFFFF"})),
+                dbc.Col(dbc.Card([   
+                            dbc.CardBody([
+                                html.Span("Casos recuperados", className="card-text"),
+                                html.H3(children=df_weather[df_weather.index == df_weather.index.max()]['days_temp'],
+                                        style={"color": "#adfc92"}, id="casos-recuperados-text_2"),
+                                html.Span("Em acompanhamento", className="card-text"),
+                                html.H5(id="em-acompanhamento-text_2"),
+                                ])
+                            ], color="light", outline=True, style={"margin-top": "10px",
+                                    "box-shadow": "0 4px 4px 0 rgba(0, 0, 0, 0.15), 0 4px 20px 0 rgba(0, 0, 0, 0.19)",
+                                    "color": "#FFFFFF"})),
+                dbc.Col(dbc.Card([   
+                            dbc.CardBody([
+                                html.Span("Casos recuperados", className="card-text"),
+                                html.H3(children=df_weather[df_weather.index == df_weather.index.max()]['days_tempmin'],
+                                        style={"color": "#adfc92"}, id="casos-recuperados-text_3"),
+                                html.Span("Em acompanhamento", className="card-text"),
+                                html.H5(id="em-acompanhamento-text_3"),
+                                ])
+                            ], color="light", outline=True, style={"margin-top": "10px",
+                                    "box-shadow": "0 4px 4px 0 rgba(0, 0, 0, 0.15), 0 4px 20px 0 rgba(0, 0, 0, 0.19)",
+                                    "color": "#FFFFFF"})),
+                dbc.Col(dbc.Card([   
+                            dbc.CardBody([
+                                html.Span("Casos recuperados", className="card-text"),
+                                html.H3(children=df_weather[df_weather.index == df_weather.index.max()]['days_windspeed'],
+                                        style={"color": "#adfc92"}, id="casos-recuperados-text_4"),
+                                html.Span("Em acompanhamento", className="card-text"),
+                                html.H5(id="em-acompanhamento-text_4"),
+                                ])
+                            ], color="light", outline=True, style={"margin-top": "10px",
+                                    "box-shadow": "0 4px 4px 0 rgba(0, 0, 0, 0.15), 0 4px 20px 0 rgba(0, 0, 0, 0.19)",
+                                    "color": "#FFFFFF"})),
+                dbc.Col(dbc.Card([   
+                            dbc.CardBody([
+                                html.Span("Casos recuperados", className="card-text"),
+                                html.H3(children=df_weather[df_weather.index == df_weather.index.max()]['days_humidity'],
+                                        style={"color": "#adfc92"}, id="casos-recuperados-text_5"),
+                                html.Span("Em acompanhamento", className="card-text"),
+                                html.H5(id="em-acompanhamento-text_5"),
+                                ])
+                            ], color="light", outline=True, style={"margin-top": "10px",
+                                    "box-shadow": "0 4px 4px 0 rgba(0, 0, 0, 0.15), 0 4px 20px 0 rgba(0, 0, 0, 0.19)",
+                                    "color": "#FFFFFF"}))
             ]
         ),
         dbc.Row(
@@ -63,13 +113,12 @@ app.layout = dbc.Container(
                 ),
                 dbc.Col(
                         [
-                            dcc.Graph(id='example-graph', figure=fig2)
+                            dcc.Graph(id='example-graph2', figure=fig2)
                         ]
                 )
-            ], style={'margin-top': '10px'}  
-    
+            ], style={'margin-top': '10px'}
         )
-    ]
+    ], fluid=True
 )
 
 @app.callback(
@@ -79,7 +128,6 @@ app.layout = dbc.Container(
 )
 def toggle_offcanvas_scrollable(n1, is_open):
     if n1:
-        print(n1)
         return not is_open
     return is_open
 
