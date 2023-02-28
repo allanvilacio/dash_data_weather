@@ -8,6 +8,7 @@ df_weather = get_df_weather()
 d_cidades = get_d_cidades()
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.CYBORG])
+app.title = "dash data weather"
 
 df_weather_fig = df_weather.groupby(by='days_datetime').mean(numeric_only=True)['days_temp'].reset_index()
 fig = px.line(df_weather_fig,
