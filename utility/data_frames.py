@@ -2,7 +2,7 @@ import pandas as pd
 from glob import glob
 from pathlib import Path
 
-path_home = f'{Path.cwd()}/data'
+path_home = f'{Path.cwd()}/database'
 
 def get_df_weather():
     arquivos_weather = glob(f'{path_home}/f_weather'+'*/*/*.parquet.gzip')

@@ -1,4 +1,4 @@
-from dash import Dash, dcc ,html, Input, Output, State, register_page
+from dash import Dash, dcc ,html, Input, Output, State
 import dash_bootstrap_components as dbc
 import plotly.express as px
 from utility.data_frames import get_df_weather, get_d_cidades
