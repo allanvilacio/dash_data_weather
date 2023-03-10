@@ -1,9 +1,9 @@
 import dash
-from dash import Dash, dcc ,html, Input, Output, callback
+from dash import dcc ,html, Input, Output, callback
 import dash_bootstrap_components as dbc
 import plotly.express as px
 
-from utility.data_frames import get_df_weather, get_d_cidades
+from utility.data_frames import get_df_weather
 
 # Data frames
 df_weather = get_df_weather()
@@ -16,7 +16,17 @@ layout = dbc.Container(
     [
         dbc.Row(
             [
-                dbc.Col(html.P(id='teste-ibge'), md=3)
+                dbc.Col(html.P(id='teste-ibge'), md=3),
+                dcc.DatePickerRange(
+                    id='filtro-datas',
+                    min_date_allowed=('2021-01-01'),
+                    max_date_allowed=('2023-12-31'),
+                    start_date =('2023-01-01'),
+                    end_date=('2023-03-31') ,
+                    display_format='DD/MM/YYYY',
+                    show_outside_days=True
+                ),
+                html.P(id='teste-filter-date')
             ]
         ),
     
@@ -83,7 +93,7 @@ layout = dbc.Container(
                 html.Footer(f"Dados atualizados até: {df_weather['days_datetime'].max().strftime('%d de %B de %Y')}.")
             ], style={'margin': '10px', 'text-align':'right'}
         )
-    ], fluid=True
+    ]
 )
 
 
@@ -99,7 +109,6 @@ def filtered_dfs(value):
 
     df_weather_filtered = df_weather[df_weather['codigo_ibge']==value]
     
-    # =========== Figure =======================
     fig1 = px.histogram(df_weather_filtered,
                         x='days_temp',
                         nbins=15)
@@ -159,13 +168,20 @@ def filtered_dfs(value):
 )
 def filtered_cards(value):
 
-    df_weather_filtered = df_weather[df_weather['codigo_ibge']==value]
-    
-    # ======= Cards =======================
-    
-    lista_cards = []
-    for column in ['days_tempmax', 'days_temp', 'days_tempmin', 'days_windspeed', 'days_humidity']:
-        lista_cards.append(df_weather_filtered.loc[df_weather_filtered.index.max()][column])
-    
-    return (value, lista_cards[0], lista_cards[1], lista_cards[2], 
-            lista_cards[3], lista_cards[4])
+    df_weather_filtered = (df_weather[(df_weather['codigo_ibge']==value) &
+                                  (df_weather['days_datetime'] == df_weather['days_datetime'].max())]
+                                  .squeeze())
+    return (value,
+            df_weather_filtered['days_tempmax'],
+            df_weather_filtered['days_temp'],
+            df_weather_filtered['days_tempmin'],
+            df_weather_filtered['days_windspeed'],
+            df_weather_filtered['days_humidity'])
+        
+
+@callback(
+    Output('teste-filter-date', 'children'),
+    Input('filtro-datas', 'start_date'),
+    Input('filtro-datas', 'end_date'))
+def teste_datas(start_date, end_date):
+    return f'data inicio: {start_date}, data final {end_date}'

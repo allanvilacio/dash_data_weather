@@ -14,18 +14,18 @@ SIDEBAR_STYLE = {
     "top": 0,
     "left": 0,
     "bottom": 0,
-    "width": "13rem",
+    "width": "12rem",
     "padding": "1rem 1rem",
-    "background-color": "#424242",
+    "background-color": "#424242"
 }
 
 CONTENT_STYLE = {
-    "margin-left": "13rem",
+    "margin-left": "12rem",
     "margin-right": "1rem",
     "padding": "1rem 1rem",
 }
 
-app.layout = dbc.Container(
+app.layout = html.Div(
     [
         html.Div(
             [
@@ -45,7 +45,17 @@ app.layout = dbc.Container(
                 dcc.Dropdown(id='location-dropdown', 
                     options=[{'label': label, 'value': value} 
 			        for label, value in d_cidades[['nome_mun','codigo_ibge']].sort_values(by='nome_mun').values],
-                    value='2704302')
+                    value='2704302'),
+		    
+                dcc.DatePickerRange(
+                    id='filtro-datas',
+                    min_date_allowed=('2021-01-01'),
+                    max_date_allowed=('2023-12-31'),
+                    start_date =('2023-01-01'),
+                    end_date=('2023-03-31') ,
+                    display_format='DD/MM/YYYY',
+                    stay_open_on_select  = True
+                )
             ],
             style=SIDEBAR_STYLE,
         ),
@@ -56,7 +66,7 @@ app.layout = dbc.Container(
             ], style=CONTENT_STYLE
         )
             
-    ], fluid= True
+    ]
 )
 
 if __name__ == '__main__':
