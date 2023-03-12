@@ -27,7 +27,7 @@ def get_d_calendario(data_inicio, data_fim):
 def get_d_cidades():
     d_capitais = pd.read_csv(f'{path_home}/d_diversos/d_municipios_e_estados.csv',
                          dtype=str,
-                         usecols=['capital','nome_mun','nome_uf','uf','codigo_ibge'])
+                         usecols=['capital','nome_mun','nome_uf','uf','codigo_ibge','regiao'])
     d_capitais = d_capitais[d_capitais['capital']=='1'].sort_values(by='uf').reset_index(drop=True)
     return d_capitais
 

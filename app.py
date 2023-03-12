@@ -1,73 +1,49 @@
-from dash import Dash, html, dcc
 import dash
 import dash_bootstrap_components as dbc
+from dash import Input, Output, html, State
 from utility.data_frames import get_d_cidades
 
-# Data frames
 d_cidades = get_d_cidades()
 
+app = dash.Dash(use_pages=True ,external_stylesheets=[dbc.themes.CYBORG])
 
-app = Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.CYBORG])
 
-SIDEBAR_STYLE = {
-    "position": "fixed",
-    "top": 0,
-    "left": 0,
-    "bottom": 0,
-    "width": "12rem",
-    "padding": "1rem 1rem",
-    "background-color": "#424242"
-}
-
-CONTENT_STYLE = {
-    "margin-left": "12rem",
-    "margin-right": "1rem",
-    "padding": "1rem 1rem",
-}
-
-app.layout = html.Div(
+app.layout = dbc.Container(
     [
-        html.Div(
+        dbc.Offcanvas(
             [
                 html.H2("Sidebar"),
                 html.Hr(),
+                html.P("A simple sidebar layout with navigation links"),
                 dbc.Nav(
                     [
                         dbc.NavLink(page['name'], href= page["relative_path"], active="exact")
-			            for page in dash.page_registry.values()
+                        for page in dash.page_registry.values()
                     ],
                     vertical=True,
                     pills=True,
                 ),
-		        html.Hr(),
-                html.H5('Filtro'),
 
-                dcc.Dropdown(id='location-dropdown', 
-                    options=[{'label': label, 'value': value} 
-			        for label, value in d_cidades[['nome_mun','codigo_ibge']].sort_values(by='nome_mun').values],
-                    value='2704302'),
-		    
-                dcc.DatePickerRange(
-                    id='filtro-datas',
-                    min_date_allowed=('2021-01-01'),
-                    max_date_allowed=('2023-12-31'),
-                    start_date =('2023-01-01'),
-                    end_date=('2023-03-31') ,
-                    display_format='DD/MM/YYYY',
-                    stay_open_on_select  = True
-                )
             ],
-            style=SIDEBAR_STYLE,
+            id="offcanvas-scrollable",
+            scrollable=True,
+            is_open=False,
         ),
-        html.Div(
-            [
-                dash.page_container,  
+        dash.page_container
+    ], fluid=True
+    )
 
-            ], style=CONTENT_STYLE
-        )
-            
-    ]
+@app.callback(
+    Output("offcanvas-scrollable", "is_open"),
+    Input("open-offcanvas-scrollable", "n_clicks"),
+    State("offcanvas-scrollable", "is_open"),
 )
+def toggle_offcanvas_scrollable(n1, is_open):
+    if n1:
+        return not is_open
+    return is_open
+
 
 if __name__ == '__main__':
 	app.run_server(debug=True)
+    
