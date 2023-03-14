@@ -63,7 +63,7 @@ layout = html.Div(children=
                 dbc.Col(
                     dcc.Loading(dcc.Graph(id='home-map', style={'height':'100%'})), md=4
                 )
-            ], style={'background-color':'lightblue'}
+            ]
             
         )
     ]
@@ -84,21 +84,25 @@ layout = html.Div(children=
 )
 def update_graphs(n_clicks, start_date, end_date, value_regiao):
     
-    filtro_regiao = value_regiao if value_regiao else d_cidades['regiao'].unique()
+    if value_regiao:
+        filtro_regiao = d_cidades[d_cidades['regiao'].isin(value_regiao)]['codigo_ibge'].unique()
+    else:
+        filtro_regiao = d_cidades['codigo_ibge'].unique()
 
-    df_weather_filtered = (df_weather[(df_weather['days_datetime'].isin(pd.date_range(start_date, end_date)))]
+    df_weather_filtered = (df_weather[(df_weather['days_datetime'].isin(pd.date_range(start_date, end_date))) &
+                                      (df_weather['codigo_ibge'].isin(filtro_regiao))]
                                 [['days_datetime','days_temp','codigo_ibge']])
     
     df_weather_filtered = df_weather_filtered.merge(d_cidades[['codigo_ibge', 'uf','regiao']], how='left')
     
-    df_weather_filtered = df_weather_filtered[df_weather_filtered['regiao'].isin(filtro_regiao)]
+
     fig_map = px.choropleth_mapbox(
         df_weather_filtered.groupby(by=['uf','regiao'])['days_temp'].mean().reset_index(),
         locations='uf',
         color='days_temp',
         geojson = stados_brasil, 
         center={"lat": -16.50, "lon": -53.80},
-        zoom=3.8, 
+        zoom=2.5, 
         opacity=1,
         height=610
     )
