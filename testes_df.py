@@ -10,20 +10,12 @@ start_date = '2023-01-01 '
 end_date = '2023-12-31 '
 
 
+filtro_regioes = d_cidades['regiao'].unique().tolist()
+filtro_regioes.append('Todas as regioes')
+print(filtro_regioes)
 
-df_weather_filtered = (df_weather[(df_weather['days_datetime'].isin(pd.date_range(start_date, end_date))) &
-                                  (df_weather['codigo_ibge'].isin(['5300108', '5208707', '5002704', '5103403']))
-                                  ]
-                                [['days_datetime','days_temp','codigo_ibge']])
-
-df_weather_filtered = df_weather_filtered.merge(d_cidades[['codigo_ibge', 'uf','regiao']], how='left')
+filtro = 'Sul'
+filtro_regioes = d_cidades['codigo_ibge'] if filtro =='Todas as regioes' else d_cidades[d_cidades['regiao']==filtro]['codigo_ibge']
 
 
-filtro_regiao = []
-for label, value in (d_cidades.groupby(by='regiao')['codigo_ibge']
-                     .apply(list)
-                     .reset_index()
-                     .values):
-    filtro_regiao.append([label, value])
-
-print(filtro_regiao)
+print(teste_filtro)

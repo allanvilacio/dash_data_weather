@@ -12,15 +12,6 @@ stados_brasil = json.load(open('database/geojson/brazil_geo.json', "r"))
 d_cidades = get_d_cidades()
 df_weather = get_df_weather()
 
-filtro_regiao = []
-for label, value in (d_cidades.groupby(by='regiao')['codigo_ibge']
-                     .apply(list)
-                     .reset_index()
-                     .values):
-    filtro_regiao.append([label,str(value)])
-
-filtro_regiao.append(['Todas as regiões',
-                        str(d_cidades['codigo_ibge'].drop_duplicates())])
 
 dash.register_page(__name__, path='/')
 
@@ -37,7 +28,8 @@ layout = html.Div(children=
                 ),
                 dbc.Col(
                     dcc.Dropdown(id='location-dropdown-regiao',
-                        options=[{'label':'sul', 'value':'sul'}, {'label':'nort', 'value':['2','3']}]
+                        options=d_cidades['regiao'].unique().tolist(),
+                        multi=True, clearable=True, placeholder='Filtro por região'
 
                     ), md=3
                 ),
@@ -91,14 +83,15 @@ layout = html.Div(children=
     ]
 )
 def update_graphs(n_clicks, start_date, end_date, value_regiao):
-    print(f' teste {value_regiao}')
+    
+    filtro_regiao = value_regiao if value_regiao else d_cidades['regiao'].unique()
 
-
-    df_weather_filtered = (df_weather[df_weather['days_datetime'].isin(pd.date_range(start_date, end_date))]
+    df_weather_filtered = (df_weather[(df_weather['days_datetime'].isin(pd.date_range(start_date, end_date)))]
                                 [['days_datetime','days_temp','codigo_ibge']])
     
     df_weather_filtered = df_weather_filtered.merge(d_cidades[['codigo_ibge', 'uf','regiao']], how='left')
-
+    
+    df_weather_filtered = df_weather_filtered[df_weather_filtered['regiao'].isin(filtro_regiao)]
     fig_map = px.choropleth_mapbox(
         df_weather_filtered.groupby(by=['uf','regiao'])['days_temp'].mean().reset_index(),
         locations='uf',
