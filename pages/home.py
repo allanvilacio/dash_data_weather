@@ -57,7 +57,7 @@ layout = html.Div(children=
                 dbc.Col(
                         [
                             dcc.Loading(dcc.Graph(id='home-histo')),
-                            dcc.Loading(dcc.Graph(id='home-line'))
+                            dcc.Loading(dcc.Graph(id='home-acumulado-precip'))
                         ]
                     ,md=8),
                 dbc.Col(
@@ -65,6 +65,9 @@ layout = html.Div(children=
                 )
             ]
             
+        ),
+        dbc.Row(
+            dcc.Graph(id='home-line')
         )
     ]
 )
@@ -73,7 +76,8 @@ layout = html.Div(children=
     [
         Output('home-map', 'figure'),
         Output('home-histo', 'figure'),
-        Output('home-line', 'figure')
+        Output('home-line', 'figure'),
+        Output('home-acumulado-precip', 'figure')
     ],
         Input('submit-button', 'n_clicks'),
     [
@@ -90,10 +94,13 @@ def update_graphs(n_clicks, start_date, end_date, value_regiao):
         filtro_regiao = d_cidades['codigo_ibge'].unique()
 
     df_weather_filtered = (df_weather[(df_weather['days_datetime'].isin(pd.date_range(start_date, end_date))) &
-                                      (df_weather['codigo_ibge'].isin(filtro_regiao))]
-                                [['days_datetime','days_temp','codigo_ibge']])
-    
+                                    (df_weather['codigo_ibge'].isin(filtro_regiao))]
+                                [['days_datetime','days_temp','codigo_ibge', 'days_precip']])
     df_weather_filtered = df_weather_filtered.merge(d_cidades[['codigo_ibge', 'uf','regiao']], how='left')
+
+    df_weather_filtered.sort_values(by=['regiao', 'uf', 'days_datetime'], 
+                                    ignore_index=True, inplace=True)
+    df_weather_filtered['days_precip_acum'] = df_weather_filtered.groupby(by=['codigo_ibge'])['days_precip'].cumsum()
     
 
     fig_map = px.choropleth_mapbox(
@@ -115,7 +122,7 @@ def update_graphs(n_clicks, start_date, end_date, value_regiao):
 
     fig_histo = px.histogram(
         (df_weather_filtered.groupby(by=['regiao','days_datetime'])['days_temp']
-            .mean()
+            .mean(numeric_only=True)
             .reset_index()
         ),
         x='days_temp', color='regiao',
@@ -126,8 +133,8 @@ def update_graphs(n_clicks, start_date, end_date, value_regiao):
     
 
     fig_line = px.line(
-        (df_weather_filtered.groupby(by=['regiao', df_weather_filtered['days_datetime'].dt.strftime('%Y-%m')])['days_temp']
-            .mean()
+        (df_weather_filtered.groupby(by=['regiao', 'days_datetime'])['days_temp']
+            .mean(numeric_only=True)
             .reset_index()),
         color='regiao',
         x='days_datetime',
@@ -135,5 +142,12 @@ def update_graphs(n_clicks, start_date, end_date, value_regiao):
         height=300
     )
     fig_line.update_layout({'hovermode':'x unified', "template":"plotly_dark"})
+
+    fig_precip_cum = px.line(
+        df_weather_filtered.groupby(by=['regiao', 'days_datetime']).sum(numeric_only=True).reset_index(),
+        x='days_datetime',
+        y='days_precip_acum',
+        color = 'regiao'
+    )
     
-    return fig_map, fig_histo, fig_line
+    return fig_map, fig_histo, fig_line, fig_precip_cum
