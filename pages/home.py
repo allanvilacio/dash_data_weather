@@ -27,6 +27,13 @@ layout = html.Div(children=
                     )
                 ),
                 dbc.Col(
+                    dcc.Dropdown(id='home-dropdown-tipo-visualizacao', 
+                        options=[{'label': 'Regiões', 'value': 'regiao'},
+                                    {'label': 'Estados', 'value': 'uf'}],
+                        value = 'regiao'
+                    )
+                ),
+                dbc.Col(
                     dcc.Dropdown(id='location-dropdown-regiao',
                         options=d_cidades['regiao'].unique().tolist(),
                         multi=True, clearable=True, placeholder='Filtro por região'
@@ -56,12 +63,12 @@ layout = html.Div(children=
             [
                 dbc.Col(
                         [
-                            dcc.Loading(dcc.Graph(id='home-histo')),
-                            dcc.Loading(dcc.Graph(id='home-acumulado-precip'))
+                            dcc.Graph(id='home-histo'),
+                            dcc.Graph(id='home-acumulado-precip')
                         ]
                     ,md=8),
                 dbc.Col(
-                    dcc.Loading(dcc.Graph(id='home-map', style={'height':'100%'})), md=4
+                    dcc.Graph(id='home-map'), md=4
                 )
             ]
             
@@ -83,11 +90,12 @@ layout = html.Div(children=
     [
         State('home-filtro-datas', 'start_date'),
         State('home-filtro-datas', 'end_date'),
-        State('location-dropdown-regiao', 'value')
+        State('location-dropdown-regiao', 'value'),
+        State('home-dropdown-tipo-visualizacao', 'value')
     ]
 )
-def update_graphs(n_clicks, start_date, end_date, value_regiao):
-    
+def update_graphs(n_clicks, start_date, end_date, value_regiao, tipo_visualizacao):
+
     if value_regiao:
         filtro_regiao = d_cidades[d_cidades['regiao'].isin(value_regiao)]['codigo_ibge'].unique()
     else:
@@ -110,44 +118,38 @@ def update_graphs(n_clicks, start_date, end_date, value_regiao):
         geojson = stados_brasil, 
         center={"lat": -16.50, "lon": -53.80},
         zoom=2.5, 
-        opacity=1,
-        height=610
+        opacity=1
     )
 
     fig_map.update_layout(
                     mapbox_accesstoken=token,
-                    margin={"r":0,"t":0,"l":0,"b":0},
-                    template='plotly_dark'
+                    margin={"r":0,"t":0,"l":0,"b":0}
     )
 
     fig_histo = px.histogram(
-        (df_weather_filtered.groupby(by=['regiao','days_datetime'])['days_temp']
+        (df_weather_filtered.groupby(by=[tipo_visualizacao,'days_datetime'])['days_temp']
             .mean(numeric_only=True)
             .reset_index()
         ),
-        x='days_temp', color='regiao',
-        nbins=20,
-        height=300
+        x='days_temp', 
+        color=tipo_visualizacao,
+        nbins=20
     )
-    fig_histo.update_layout({'hovermode':'x unified', "template":"plotly_dark"})
     
-
     fig_line = px.line(
-        (df_weather_filtered.groupby(by=['regiao', 'days_datetime'])['days_temp']
+        (df_weather_filtered.groupby(by=[tipo_visualizacao, 'days_datetime'])['days_temp']
             .mean(numeric_only=True)
             .reset_index()),
-        color='regiao',
+        color=tipo_visualizacao,
         x='days_datetime',
         y='days_temp',
-        height=300
     )
-    fig_line.update_layout({'hovermode':'x unified', "template":"plotly_dark"})
 
     fig_precip_cum = px.line(
-        df_weather_filtered.groupby(by=['regiao', 'days_datetime']).sum(numeric_only=True).reset_index(),
+        df_weather_filtered.groupby(by=[tipo_visualizacao, 'days_datetime']).sum(numeric_only=True).reset_index(),
         x='days_datetime',
         y='days_precip_acum',
-        color = 'regiao'
+        color = tipo_visualizacao
     )
     
     return fig_map, fig_histo, fig_line, fig_precip_cum
