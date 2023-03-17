@@ -12,20 +12,12 @@ stados_brasil = json.load(open('database/geojson/brazil_geo.json', "r"))
 d_cidades = get_d_cidades()
 df_weather = get_df_weather()
 
-
 dash.register_page(__name__, path='/')
 
 layout = html.Div(children=
     [
         dbc.Row(
             [
-                dbc.Col(
-                    dbc.Button(
-                        "Open",
-                        id="open-offcanvas-scrollable",
-                        n_clicks=0,
-                    )
-                ),
                 dbc.Col(
                     dcc.Dropdown(id='home-dropdown-tipo-visualizacao', 
                         options=[{'label': 'Regiões', 'value': 'regiao'},

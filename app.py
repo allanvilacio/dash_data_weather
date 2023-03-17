@@ -1,57 +1,64 @@
 import dash
 import dash_bootstrap_components as dbc
-from dash import Input, Output, html, State, dcc
-from utility.data_frames import get_d_cidades
+from dash import  html
 
-d_cidades = get_d_cidades()
+app = dash.Dash(use_pages=True , 
+                suppress_callback_exceptions=True,
+                external_stylesheets=[dbc.themes.MATERIA, dbc.icons.FONT_AWESOME])
 
-app = dash.Dash(use_pages=True ,external_stylesheets=[dbc.themes.CYBORG])
 
-
-app.layout = dbc.Container(
+sidebar = html.Div(
     [
-        dbc.Offcanvas(
+        html.Div(
             [
-                html.H2("Sidebar"),
-                html.Hr(),
-                html.P("A simple sidebar layout with navigation links"),
-                dbc.Nav(
-                    [
-                        dbc.NavLink(page['name'], href= page["relative_path"], active="exact")
-                        for page in dash.page_registry.values()
-                    ],
-                    vertical=True,
-                    pills=True,
-                ),
-                dcc.DatePickerRange(
-                        id='home-fildddtro-datas',
-                        min_date_allowed=('2021-01-01'),
-                        max_date_allowed=('2023-12-31'),
-                        start_date =('2023-01-01'),
-                        end_date=('2023-03-31') ,
-                        display_format='DD/MM/YYYY'
-                    )
-
+                html.H2("Data Weather", style={"color": "white"}),
             ],
-            id="offcanvas-scrollable",
-            scrollable=True,
-            is_open=False, style={'width':'350px'}
+            className="sidebar-header",
         ),
-        dash.page_container
-    ], fluid=True
-    )
-
-@app.callback(
-    Output("offcanvas-scrollable", "is_open"),
-    Input("open-offcanvas-scrollable", "n_clicks"),
-    State("offcanvas-scrollable", "is_open"),
+        html.Hr(),
+        dbc.Nav(
+            [
+                dbc.NavLink(
+                    [html.I(className="fas fa-home me-2"), html.Span("Dashboard")],
+                    href="/",
+                    active="exact",
+                ),
+                dbc.NavLink(
+                    [
+                        html.I(className="fa-sharp fa-solid fa-sliders"),
+                        html.Span("Detalhe"),
+                    ],
+                    href="/detalhe",
+                    active="exact",
+                ),
+                dbc.NavLink(
+                    [
+                        html.I(className="fas fa-calendar-alt me-2"),
+                        html.Span("Datasets"),
+                    ],
+                    href="/datasets",
+                    active="exact",
+                ),
+            ],
+            vertical=True,
+            pills=True,
+        ),
+    ],
+    className="sidebar",
 )
-def toggle_offcanvas_scrollable(n1, is_open):
-    if n1:
-        return not is_open
-    return is_open
+
+app.layout = html.Div(
+    [
+        sidebar,
+        html.Div(
+            [
+                dash.page_container
+            ],
+            className="content",
+        ),
+    ]
+)
 
 
-if __name__ == '__main__':
-	app.run_server(debug=True)
-    
+if __name__ == "__main__":
+    app.run_server(debug=True)

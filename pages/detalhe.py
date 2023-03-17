@@ -16,14 +16,7 @@ STYLE_CARDS = {"margin-top": "10px", 'text-align':'center'}
 layout = dbc.Container(
     [
         dbc.Row(
-            [
-                dbc.Col(
-                    dbc.Button(
-                        "Open scrollable offcanvas",
-                        id="open-offcanvas-scrollable",
-                        n_clicks=0,
-                    )
-                ),    
+            [    
                 dbc.Col(html.P(id='teste-ibge'), md=3),
                 dbc.Col(
                     dcc.Dropdown(id='location-dropdown', 
