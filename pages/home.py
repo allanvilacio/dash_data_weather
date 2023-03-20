@@ -14,7 +14,7 @@ df_weather = get_df_weather()
 
 dash.register_page(__name__, path='/')
 
-layout = html.Div(children=
+layout = html.Div(
     [
         dbc.Row(
             [
@@ -23,14 +23,14 @@ layout = html.Div(children=
                         options=[{'label': 'Regiões', 'value': 'regiao'},
                                     {'label': 'Estados', 'value': 'uf'}],
                         value = 'regiao'
-                    )
+                    ), md=2
                 ),
                 dbc.Col(
                     dcc.Dropdown(id='location-dropdown-regiao',
                         options=d_cidades['regiao'].unique().tolist(),
                         multi=True, clearable=True, placeholder='Filtro por região'
 
-                    ), md=3
+                    ), md=2
                 ),
                 dbc.Col(
                     dcc.DatePickerRange(
@@ -40,16 +40,75 @@ layout = html.Div(children=
                         start_date =('2023-01-01'),
                         end_date=('2023-03-31') ,
                         display_format='DD/MM/YYYY'
-                    ), md=3
+                    )
                 ),
                 dbc.Col(
                     dbc.Button(
                         'submit',
                         id='submit-button',
                         n_clicks=0,
-                    ),md=1
+                    ), md=1
                 )
             ], style={ 'height': '80px', 'align-items': 'center'}
+        ),
+        dbc.Row(
+            [
+                dbc.Col(
+                    dbc.Card(
+                            [
+                                dbc.CardHeader("Maior temperatura"),
+                                dbc.CardBody(
+                                    html.H4("Card title")
+                                ),
+                                dbc.CardFooter("This is the footer"),
+                            ], id='home-card-maior-temp'
+                    )
+                ),
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader("Menor temperatura"),
+                                dbc.CardBody(
+                                    html.H4("Card title")
+                                ),
+                            dbc.CardFooter("This is the footer"),
+                        ], id='home-card-menor-temp'
+                    )
+                ),
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader("Maior volume no dia"),
+                                dbc.CardBody(
+                                    html.H4("Card title")
+                                ),
+                            dbc.CardFooter("This is the footer"),
+                        ], id='home-card-maior-volume-dia'
+                    )
+                ),
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader("Maior volume acumulado"),
+                                dbc.CardBody(
+                                    html.H4("Card title")
+                                ),
+                            dbc.CardFooter("This is the footer"),
+                        ], id='home-card-maior-volume-acumulado'
+                    )
+                ),
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader("Menor volume acumulado"),
+                                dbc.CardBody(
+                                    html.H4("Card title")
+                                ),
+                            dbc.CardFooter("This is the footer"),
+                        ],id='home-card-menor-volume-acumulado'
+                    )
+                ) 
+            ]
         ),
         dbc.Row(
             [
@@ -144,4 +203,6 @@ def update_graphs(n_clicks, start_date, end_date, value_regiao, tipo_visualizaca
         color = tipo_visualizacao
     )
     
+
+
     return fig_map, fig_histo, fig_line, fig_precip_cum
