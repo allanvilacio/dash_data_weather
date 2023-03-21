@@ -54,59 +54,19 @@ layout = html.Div(
         dbc.Row(
             [
                 dbc.Col(
-                    dbc.Card(
-                            [
-                                dbc.CardHeader("Maior temperatura"),
-                                dbc.CardBody(
-                                    html.H4("Card title")
-                                ),
-                                dbc.CardFooter("This is the footer"),
-                            ], id='home-card-maior-temp'
-                    )
+                    dbc.Card(id='home-card-maior-temp' )
                 ),
                 dbc.Col(
-                    dbc.Card(
-                        [
-                            dbc.CardHeader("Menor temperatura"),
-                                dbc.CardBody(
-                                    html.H4("Card title")
-                                ),
-                            dbc.CardFooter("This is the footer"),
-                        ], id='home-card-menor-temp'
-                    )
+                    dbc.Card( id='home-card-menor-temp' )
                 ),
                 dbc.Col(
-                    dbc.Card(
-                        [
-                            dbc.CardHeader("Maior volume no dia"),
-                                dbc.CardBody(
-                                    html.H4("Card title")
-                                ),
-                            dbc.CardFooter("This is the footer"),
-                        ], id='home-card-maior-volume-dia'
-                    )
+                    dbc.Card( id='home-card-maior-volume-dia')
                 ),
                 dbc.Col(
-                    dbc.Card(
-                        [
-                            dbc.CardHeader("Maior volume acumulado"),
-                                dbc.CardBody(
-                                    html.H4("Card title")
-                                ),
-                            dbc.CardFooter("This is the footer"),
-                        ], id='home-card-maior-volume-acumulado'
-                    )
+                    dbc.Card( id='home-card-maior-volume-acumulado')
                 ),
                 dbc.Col(
-                    dbc.Card(
-                        [
-                            dbc.CardHeader("Menor volume acumulado"),
-                                dbc.CardBody(
-                                    html.H4("Card title")
-                                ),
-                            dbc.CardFooter("This is the footer"),
-                        ],id='home-card-menor-volume-acumulado'
-                    )
+                    dbc.Card(id='home-card-menor-volume-acumulado')
                 ) 
             ]
         ),
@@ -135,7 +95,12 @@ layout = html.Div(
         Output('home-map', 'figure'),
         Output('home-histo', 'figure'),
         Output('home-line', 'figure'),
-        Output('home-acumulado-precip', 'figure')
+        Output('home-acumulado-precip', 'figure'),
+        Output('home-card-maior-temp', 'children'),
+        Output('home-card-menor-temp', 'children'),
+        Output('home-card-maior-volume-dia', 'children'),
+        Output('home-card-maior-volume-acumulado', 'children'),
+        Output('home-card-menor-volume-acumulado', 'children'),
     ],
         Input('submit-button', 'n_clicks'),
     [
@@ -202,7 +167,56 @@ def update_graphs(n_clicks, start_date, end_date, value_regiao, tipo_visualizaca
         y='days_precip_acum',
         color = tipo_visualizacao
     )
+
+
+    home_card_maior_temp =  [
+                                dbc.CardHeader("Maior temperatura"),
+                                dbc.CardBody(
+                                    html.H4(df_weather_filtered.loc[df_weather_filtered['days_temp'].idxmax()]['days_temp'])
+                                ),
+                                dbc.CardFooter(f"Estado: {df_weather_filtered.loc[df_weather_filtered['days_temp'].idxmax()]['uf']}"),
+                            ]
+
+    home_card_menor_temp = [
+                                dbc.CardHeader("Menor temperatura"),
+                                dbc.CardBody(
+                                    html.H4(df_weather_filtered.loc[df_weather_filtered['days_temp'].idxmin()]['days_temp'])
+                                ),
+                                dbc.CardFooter(f"Estado: {df_weather_filtered.loc[df_weather_filtered['days_temp'].idxmin()]['uf']}"),
+                            ]
+
+    home_card_maior_volume_dia = [
+                                    dbc.CardHeader("Maior volume no dia"),
+                                    dbc.CardBody(
+                                        html.H4(df_weather_filtered.loc[df_weather_filtered['days_precip'].idxmax()]['days_precip'])
+                                    ),
+                                    dbc.CardFooter(f"Estado: {df_weather_filtered.loc[df_weather_filtered['days_precip'].idxmax()]['uf']}"),
+                                ]
     
+    home_card_maior_volume_acumulado = [
+                                            dbc.CardHeader("Maior volume no dia"),
+                                            dbc.CardBody(
+                                                html.H4(df_weather_filtered.loc[df_weather_filtered['days_precip_acum'].idxmax()]['days_precip_acum'])
+                                            ),
+                                            dbc.CardFooter(f"Estado: {df_weather_filtered.loc[df_weather_filtered['days_precip_acum'].idxmax()]['uf']}"),
+                                        ]
+    
+    home_card_menor_volume_acumulado = [
+                                            dbc.CardHeader("Maior volume no dia"),
+                                            dbc.CardBody(
+                                                html.H4(df_weather_filtered.loc[df_weather_filtered['days_precip_acum'].idxmin()]['days_precip_acum'])
+                                            ),
+                                            dbc.CardFooter(f"Estado: {df_weather_filtered.loc[df_weather_filtered['days_precip_acum'].idxmin()]['uf']}"),
+                                        ]
 
-
-    return fig_map, fig_histo, fig_line, fig_precip_cum
+    return (
+        fig_map, 
+        fig_histo, 
+        fig_line, 
+        fig_precip_cum,
+        home_card_maior_temp,
+        home_card_menor_temp,
+        home_card_maior_volume_dia,
+        home_card_maior_volume_acumulado,
+        home_card_menor_volume_acumulado
+    )
