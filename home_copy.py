@@ -113,14 +113,15 @@ layout = html.Div(
 def update_graphs(n_clicks, start_date, end_date, value_regiao, tipo_visualizacao):
     
     if value_regiao:
-        filtro_codigo_ibge = d_cidades[d_cidades['regiao'].isin(value_regiao)]['codigo_ibge'].unique()
+        filtro_regiao = d_cidades[d_cidades['regiao'].isin(value_regiao)]['codigo_ibge'].unique()
     else:
-        filtro_codigo_ibge = d_cidades['codigo_ibge'].unique()
+        filtro_regiao = d_cidades['codigo_ibge'].unique()
+        
+    df_weather_filtered = get_df_weather()
 
-    df_weather_filtered = get_df_weather(start_date=start_date,
-                                         end_date=end_date,
-                                         filtro_codigo_ibge=filtro_codigo_ibge)
-
+    df_weather_filtered = (df_weather_filtered[(df_weather_filtered['days_datetime'].isin(pd.date_range(start_date, end_date))) &
+                                    (df_weather_filtered['codigo_ibge'].isin(filtro_regiao))]
+                                [['days_datetime','days_temp','codigo_ibge', 'days_precip']])
     df_weather_filtered = df_weather_filtered.merge(d_cidades[['codigo_ibge', 'uf','regiao']], how='left')
 
     df_weather_filtered.sort_values(by=['regiao', 'uf', 'days_datetime'], 

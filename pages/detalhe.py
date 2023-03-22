@@ -6,9 +6,11 @@ import plotly.express as px
 from utility.data_frames import get_df_weather, get_d_cidades
 
 # Data frames
-df_weather = get_df_weather()
-d_cidades = get_d_cidades()
 
+d_cidades = get_d_cidades()
+df_weather = get_df_weather(start_date='2023-01-01',
+                            end_date='2023-03-31',
+                            filtro_codigo_ibge=d_cidades['codigo_ibge'].unique())
 dash.register_page(__name__)
 
 STYLE_CARDS = {"margin-top": "10px", 'text-align':'center'}
