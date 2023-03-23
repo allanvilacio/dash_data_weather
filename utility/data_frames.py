@@ -21,9 +21,7 @@ def get_df_weather(start_date, end_date, filtro_codigo_ibge):
                 df_weather = pd.concat([df_weather, frame], axis=0, ignore_index=True)
 
     del frame
-
-    df_weather = (df_weather.sort_values(by=['days_datetime','address']).reset_index(drop=True))
-
+    
     return df_weather
 
 

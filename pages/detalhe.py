@@ -8,14 +8,10 @@ from utility.data_frames import get_df_weather, get_d_cidades
 # Data frames
 
 d_cidades = get_d_cidades()
-df_weather = get_df_weather(start_date='2023-01-01',
-                            end_date='2023-03-31',
-                            filtro_codigo_ibge=d_cidades['codigo_ibge'].unique())
+
 dash.register_page(__name__)
 
-STYLE_CARDS = {"margin-top": "10px", 'text-align':'center'}
-
-layout = dbc.Container(
+layout = html.Div(
     [
         dbc.Row(
             [    
@@ -29,7 +25,7 @@ layout = dbc.Container(
                 ),
                 dbc.Col(
                     dcc.DatePickerRange(
-                        id='filtro-datas',
+                        id='home-filtro-datas',
                         min_date_allowed=('2021-01-01'),
                         max_date_allowed=('2023-12-31'),
                         start_date =('2023-01-01'),
@@ -37,7 +33,7 @@ layout = dbc.Container(
                         display_format='DD/MM/YYYY'
                     )
                 )
-            ], style={ 'height': '100px', 'align-items': 'center'}
+            ]
         ),
     
         dbc.Row(
@@ -46,36 +42,31 @@ layout = dbc.Container(
                             dbc.CardBody([
                                 html.Span('tempmax', className="card-text"),
                                 html.H3( style={"color": "#adfc92"}, id='card-tempmax')
-                                ]), color='light', outline=True, 
-                                style=STYLE_CARDS)
+                                ]), color='light', outline=True)
                 ),
                 dbc.Col(dbc.Card(
                             dbc.CardBody([
                                 html.Span('temp', className="card-text"),
                                 html.H3(style={"color": "#adfc92"}, id='card-temp')
-                                ]), color="light", outline=True, 
-                                style=STYLE_CARDS)
+                                ]), color="light", outline=True)
                 ),
                 dbc.Col(dbc.Card(
                             dbc.CardBody([
                                 html.Span('tempmin', className="card-text"),
                                 html.H3(style={"color": "#adfc92"}, id='card-tempmin')
-                                ]), color="light", outline=True,
-                                style=STYLE_CARDS)
+                                ]), color="light", outline=True)
                 ),
                 dbc.Col(dbc.Card( 
                             dbc.CardBody([
                                 html.Span('windspeed', className="card-text"),
                                 html.H3(style={"color": "#adfc92"}, id='card-windspeed')
-                                ]), color="light", outline=True,
-                                style=STYLE_CARDS)
+                                ]), color="light", outline=True)
                 ),
                 dbc.Col(dbc.Card( 
                             dbc.CardBody([
                                 html.Span('humidity', className="card-text"),
                                 html.H3(style={"color": "#adfc92"}, id='card-humidity')
-                                ]), color="light", outline=True,
-                                style=STYLE_CARDS)
+                                ]), color="light", outline=True)
                 )
             ]
         ),
@@ -96,14 +87,8 @@ layout = dbc.Container(
                 dbc.Col(dcc.Graph(id='example-graph3'))
                 
             ], style={'margin-top': '10px'}
-        ),
-
-        dbc.Row(
-            [
-                html.Footer(f"Dados atualizados até: {df_weather['days_datetime'].max().strftime('%d de %B de %Y')}.")
-            ], style={'margin': '10px', 'text-align':'right'}
         )
-    ], fluid=True
+    ]
 )
 
 
@@ -113,11 +98,18 @@ layout = dbc.Container(
         Output('example-graph2', 'figure'),
         Output('example-graph3', 'figure')
     ],
-    [Input('location-dropdown', 'value')]
+    [
+        Input('location-dropdown', 'value'),
+        Input('home-filtro-datas', 'start_date'),
+        Input('home-filtro-datas', 'end_date')
+    ]
 )
-def filtered_dfs(value):
+def filtered_dfs(value, start_date, end_date):
+    df_weather = get_df_weather(start_date=start_date,
+                                end_date=end_date,
+                                filtro_codigo_ibge=[value])
 
-    df_weather_filtered = df_weather[df_weather['codigo_ibge']==value]
+    df_weather_filtered = df_weather
     
     fig1 = px.histogram(df_weather_filtered,
                         x='days_temp',
@@ -161,7 +153,6 @@ def filtered_dfs(value):
     fig3.update_layout({'hovermode':'x unified', "template":"plotly_dark"},
                       margin=dict(l=10, r=10, b=10, t=50))
 
-    
     return (fig1, fig2, fig3)
 
 
@@ -177,6 +168,9 @@ def filtered_dfs(value):
     [Input('location-dropdown', 'value')]
 )
 def filtered_cards(value):
+    df_weather = get_df_weather(start_date='2023-01-01',
+                            end_date='2023-03-31',
+                            filtro_codigo_ibge=d_cidades['codigo_ibge'].unique())
 
     df_weather_filtered = (df_weather[(df_weather['codigo_ibge']==value) &
                                   (df_weather['days_datetime'] == df_weather['days_datetime'].max())]

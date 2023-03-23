@@ -1,10 +1,11 @@
 import dash
-import pandas as pd
 from dash import dcc ,html, Input, Output, callback, State
 import dash_bootstrap_components as dbc
 from utility.data_frames import get_df_weather, get_d_cidades
+import pandas as pd
 import json
 import plotly.express as px
+import plotly.graph_objects as go
 
 token = open(".mapbox_token").read()
 stados_brasil = json.load(open('database/geojson/brazil_geo.json', "r"))
@@ -54,19 +55,59 @@ layout = html.Div(
         dbc.Row(
             [
                 dbc.Col(
-                    dbc.Card(id='home-card-maior-temp' )
+                    dbc.Card(
+                        [
+                            dbc.CardHeader(''),
+                            dbc.CardBody(
+                            html.H4('')
+                            ),
+                            dbc.CardFooter('')
+                        ],
+                        id='home-card-maior-temp' )
                 ),
                 dbc.Col(
-                    dbc.Card( id='home-card-menor-temp' )
+                    dbc.Card( 
+                        [
+                            dbc.CardHeader(''),
+                            dbc.CardBody(
+                            html.H4('')
+                            ),
+                            dbc.CardFooter('')
+                        ],
+                        id='home-card-menor-temp' )
                 ),
                 dbc.Col(
-                    dbc.Card( id='home-card-maior-volume-dia')
+                    dbc.Card(
+                        [
+                            dbc.CardHeader(''),
+                            dbc.CardBody(
+                            html.H4('')
+                            ),
+                            dbc.CardFooter('')
+                        ],
+                        id='home-card-maior-volume-dia')
                 ),
                 dbc.Col(
-                    dbc.Card( id='home-card-maior-volume-acumulado')
+                    dbc.Card(
+                        [
+                            dbc.CardHeader(''),
+                            dbc.CardBody(
+                            html.H4('')
+                            ),
+                            dbc.CardFooter('')
+                        ],
+                        id='home-card-maior-volume-acumulado')
                 ),
                 dbc.Col(
-                    dbc.Card(id='home-card-menor-volume-acumulado')
+                    dbc.Card(
+                        [
+                            dbc.CardHeader(''),
+                            dbc.CardBody(
+                            html.H4('')
+                            ),
+                            dbc.CardFooter('')
+                        ],
+                        id='home-card-menor-volume-acumulado')
                 ) 
             ]
         ),
@@ -137,25 +178,28 @@ def update_graphs(n_clicks, start_date, end_date, value_regiao, tipo_visualizaca
         zoom=2.5, 
         opacity=1
     )
-
+    
     fig_map.update_layout(
-                    mapbox_accesstoken=token,
-                    margin={"r":0,"t":0,"l":0,"b":0}
-    )
+                mapbox_accesstoken=token,
+                paper_bgcolor="#242424",
+                autosize=True,
+                mapbox_style="carto-darkmatter",
+                margin=go.layout.Margin(l=0, r=0, t=0, b=0),
+                showlegend=False)
 
     fig_histo = px.histogram(
-        (df_weather_filtered.groupby(by=[tipo_visualizacao,'days_datetime'])['days_temp']
-            .mean(numeric_only=True)
-            .reset_index()
-        ),
+        (df_weather_filtered.groupby(by=['regiao','days_datetime'])
+            .agg({'days_temp':'mean','days_precip_acum':'sum' })
+            .reset_index()),
         x='days_temp', 
         color=tipo_visualizacao,
         nbins=20
     )
+    fig_histo.update_layout(barmode='stack')
     
     fig_line = px.line(
-        (df_weather_filtered.groupby(by=[tipo_visualizacao, 'days_datetime'])['days_temp']
-            .mean(numeric_only=True)
+        (df_weather_filtered.groupby(by=['regiao','days_datetime'])
+            .agg({'days_temp':'mean','days_precip_acum':'sum' })
             .reset_index()),
         color=tipo_visualizacao,
         x='days_datetime',
@@ -163,7 +207,9 @@ def update_graphs(n_clicks, start_date, end_date, value_regiao, tipo_visualizaca
     )
 
     fig_precip_cum = px.line(
-        df_weather_filtered.groupby(by=[tipo_visualizacao, 'days_datetime']).sum(numeric_only=True).reset_index(),
+        (df_weather_filtered.groupby(by=['regiao','days_datetime'])
+            .agg({'days_temp':'mean','days_precip_acum':'sum' })
+            .reset_index()),
         x='days_datetime',
         y='days_precip_acum',
         color = tipo_visualizacao
